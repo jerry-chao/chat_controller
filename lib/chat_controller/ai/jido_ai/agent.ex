@@ -33,6 +33,6 @@ defmodule ChatController.AI.JidoAI.Agent do
   Starts the ChatAgent.
   """
   def start_link(opts \\ []) do
-    Jido.AgentServer.start(agent: __MODULE__, opts: opts)
+    ChatController.Jido.start_agent(__MODULE__, opts)
   end
 end

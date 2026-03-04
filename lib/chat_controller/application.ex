@@ -12,6 +12,7 @@ defmodule ChatController.Application do
       ChatController.Repo,
       {DNSCluster, query: Application.get_env(:chat_controller, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: ChatController.PubSub},
+      ChatController.Jido,
       # Start a worker by calling: ChatController.Worker.start_link(arg)
       # {ChatController.Worker, arg},
       # Start to serve requests, typically the last entry
