@@ -107,10 +107,47 @@ defmodule ChatController.AI.LLM do
 
   defp build_model(model_name) when is_binary(model_name) do
     if String.contains?(model_name, ":") do
-      ReqLLM.model(model_name)
+      [provider_str, model_id] = String.split(model_name, ":", parts: 2)
+      
+      provider = 
+        try do
+          String.to_existing_atom(provider_str)
+        rescue
+          ArgumentError -> 
+            # Fall back to trying ReqLLM.model for built-in providers
+            case ReqLLM.model(model_name) do
+              {:ok, model} -> 
+                model.provider
+              _ -> 
+                nil
+            end
+        end
+      
+      cond do
+        is_nil(provider) ->
+          ReqLLM.model(model_name)
+          
+        provider_registered?(provider) ->
+          model = LLMDB.Model.new!(%{id: model_id, provider: provider})
+          {:ok, model}
+          
+        true ->
+          ReqLLM.model(model_name)
+      end
     else
       ReqLLM.model(%{id: model_name, provider: provider()})
     end
+  rescue
+    _ -> 
+      ReqLLM.model(model_name)
+  end
+
+  defp provider_registered?(provider_id) do
+    case ReqLLM.Provider.get!(provider_id) do
+      _ -> true
+    end
+  rescue
+    _ -> false
   end
 
   defp with_default_base_url(opts) do

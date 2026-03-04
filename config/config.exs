@@ -64,7 +64,8 @@ config :phoenix, :json_library, Jason
 config :jido_ai,
   model_aliases: %{
     fast: "openai:gpt-3.5-turbo",
-    capable: "openai:gpt-4"
+    capable: "openai:gpt-4",
+    bigmodel_glm4: :bigmodel_glm4
   }
 
 config :req_llm,

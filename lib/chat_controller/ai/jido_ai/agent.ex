@@ -7,7 +7,7 @@ defmodule ChatController.AI.JidoAI.Agent do
   use Jido.AI.Agent,
     name: "chat_agent",
     description: "AI assistant for ChatController with tool-calling",
-    model: :fast,
+    model: "bigmodel:glm-4",
     tools: [
       ChatController.AI.JidoAI.WeatherAction,
       ChatController.AI.JidoAI.UserInfoAction,
