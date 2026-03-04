@@ -6,7 +6,7 @@ A Phoenix LiveView chat application with AI assistant capabilities powered by Re
 - Tool calling support (weather, user info, HTTP requests)
 - PostgreSQL persistence for conversations and messages
 - Beautiful gradient UI with smooth animations
-- Support for multiple LLM providers (OpenAI, Ollama, etc.)
+- Support for multiple LLM providers (OpenAI, Ollama, BigModel, etc.)
 
 ## Features
 
@@ -32,7 +32,7 @@ This project uses a custom Jido-style orchestration pattern with ReqLLM:
 - Elixir 1.14+ and Erlang/OTP 25+
 - PostgreSQL 14+
 - Node.js 18+ (for asset compilation)
-- OpenAI API key OR local Ollama installation
+- OpenAI API key OR local Ollama installation OR BigModel API key
 
 ## Setup
 
@@ -69,6 +69,14 @@ export LLM_MODEL="llama2"
 # No API key needed for Ollama
 ```
 
+**For BigModel (智谱AI):**
+```bash
+export BIGMODEL_API_KEY="your-bigmodel-api-key"
+# Then use BigModel via ReqLLM
+```
+
+See [BigModel Quick Start Guide](BIGMODEL快速开始.md) for detailed usage.
+
 ### 3. Setup Database
 
 ```bash
@@ -91,6 +99,23 @@ iex -S mix phx.server
 Visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 ## Usage
+
+### Using BigModel with ReqLLM
+
+This project includes a custom BigModel provider for ReqLLM. To use it:
+
+```elixir
+# In IEx or your code
+model = LLMDB.Model.new!(%{id: "glm-4", provider: :bigmodel})
+{:ok, response} = ReqLLM.generate_text(model, "你好，请介绍一下你自己")
+text = ReqLLM.Response.text(response)
+```
+
+See the comprehensive guides:
+- [Quick Start Guide (English)](BIGMODEL_QUICKSTART.md)
+- [快速开始指南（中文）](BIGMODEL快速开始.md)
+- [Implementation Details](BIGMODEL_IMPLEMENTATION.md)
+- [Detailed Usage Guide](lib/chat_controller/ai/big_model_usage.md)
 
 ### Quick Test
 
@@ -153,6 +178,7 @@ end
 ```
 lib/chat_controller/
 ├── ai/
+│   ├── big_model.ex           # Custom BigModel provider for ReqLLM
 │   ├── chat_agent.ex          # GenServer for chat sessions
 │   ├── llm.ex                 # ReqLLM wrapper
 │   ├── llm_response.ex        # Response adapter
@@ -234,6 +260,27 @@ mix precommit
 
 ## Deployment
 Ready to run in production? Please [check the Phoenix deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+
+## BigModel Provider
+
+This project includes a fully-featured custom provider for BigModel (智谱AI):
+
+- ✅ Minimal implementation (14 lines of code)
+- ✅ Full OpenAI compatibility via ReqLLM defaults
+- ✅ Chat completions, streaming, tools, vision (glm-4v)
+- ✅ Comprehensive documentation and examples
+- ✅ Unit tested (6/6 tests passing)
+
+**Available Models:**
+- `glm-4` - Standard chat model
+- `glm-4-plus` - Enhanced performance
+- `glm-4v` - Vision model
+- `glm-3-turbo` - Fast & cost-effective
+
+For more information, see:
+- [Quick Start (English)](BIGMODEL_QUICKSTART.md)
+- [快速开始（中文）](BIGMODEL快速开始.md)
+- [Implementation Guide](BIGMODEL_IMPLEMENTATION.md)
 
 ## Reference Project
 

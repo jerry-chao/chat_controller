@@ -68,7 +68,8 @@ config :jido_ai,
   }
 
 config :req_llm,
-  openai_api_key: System.get_env("OPENAI_API_KEY")
+  openai_api_key: System.get_env("OPENAI_API_KEY"),
+  custom_providers: [ChatController.AI.BigModel]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

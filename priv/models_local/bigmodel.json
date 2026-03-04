@@ -1,0 +1,80 @@
+{
+  "provider": {
+    "id": "bigmodel",
+    "name": "BigModel"
+  },
+  "models": [
+    {
+      "id": "glm-4",
+      "name": "GLM-4",
+      "type": "chat",
+      "capabilities": {
+        "stream": true,
+        "tool_call": true,
+        "vision": false
+      },
+      "modalities": {
+        "input": ["text"],
+        "output": ["text"]
+      },
+      "cost": {
+        "input": 0.0001,
+        "output": 0.0001
+      }
+    },
+    {
+      "id": "glm-4-plus",
+      "name": "GLM-4 Plus",
+      "type": "chat",
+      "capabilities": {
+        "stream": true,
+        "tool_call": true,
+        "vision": false
+      },
+      "modalities": {
+        "input": ["text"],
+        "output": ["text"]
+      },
+      "cost": {
+        "input": 0.0005,
+        "output": 0.0005
+      }
+    },
+    {
+      "id": "glm-4v",
+      "name": "GLM-4V",
+      "type": "chat",
+      "capabilities": {
+        "stream": true,
+        "tool_call": true,
+        "vision": true
+      },
+      "modalities": {
+        "input": ["text", "image"],
+        "output": ["text"]
+      },
+      "cost": {
+        "input": 0.0005,
+        "output": 0.0005
+      }
+    },
+    {
+      "id": "glm-3-turbo",
+      "name": "GLM-3 Turbo",
+      "type": "chat",
+      "capabilities": {
+        "stream": true,
+        "tool_call": true,
+        "vision": false
+      },
+      "modalities": {
+        "input": ["text"],
+        "output": ["text"]
+      },
+      "cost": {
+        "input": 0.00005,
+        "output": 0.00005
+      }
+    }
+  ]
+}
