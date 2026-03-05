@@ -1,12 +1,12 @@
 # ChatController
 
-A Phoenix LiveView chat application with AI assistant capabilities powered by ReqLLM. Features include:
+A Phoenix LiveView chat application with AI assistant capabilities powered by LangChain. Features include:
 
 - Real-time chat interface with AI assistant
 - Tool calling support (weather, user info, HTTP requests)
 - PostgreSQL persistence for conversations and messages
 - Beautiful gradient UI with smooth animations
-- Support for multiple LLM providers (OpenAI, Ollama, BigModel, etc.)
+- Support for multiple LLM providers (OpenAI, BigModel, etc.)
 
 ## Features
 
@@ -20,11 +20,10 @@ The AI assistant has access to three built-in tools:
 
 ### Architecture
 
-This project uses a custom Jido-style orchestration pattern with ReqLLM:
+This project uses LangChain for AI orchestration:
 
 - **ChatAgent** - GenServer managing chat sessions with message history
-- **LLM Module** - Wrapper around ReqLLM for OpenAI-compatible APIs
-- **Orchestration** - Multi-step flow (ModelStep → ToolStep → CompletionStep)
+- **LangChain Agent** - AI agent with tool calling capabilities
 - **Database Layer** - Ecto schemas for conversations and messages
 
 ## Prerequisites
@@ -32,7 +31,7 @@ This project uses a custom Jido-style orchestration pattern with ReqLLM:
 - Elixir 1.14+ and Erlang/OTP 25+
 - PostgreSQL 14+
 - Node.js 18+ (for asset compilation)
-- OpenAI API key OR local Ollama installation OR BigModel API key
+- BigModel API key (智谱AI) or OpenAI API key
 
 ## Setup
 
@@ -53,29 +52,17 @@ cp .env.example .env
 # Edit .env with your settings
 ```
 
-**For OpenAI:**
-```bash
-export OPENAI_API_KEY="sk-your-key-here"
-export OPENAI_BASE_URL="https://api.openai.com/v1"
-export LLM_MODEL="gpt-3.5-turbo"
-```
-
-**For Ollama (local):**
-```bash
-# Start Ollama first: ollama serve
-# Pull a model: ollama pull llama2
-export OPENAI_BASE_URL="http://localhost:11434/v1"
-export LLM_MODEL="llama2"
-# No API key needed for Ollama
-```
-
 **For BigModel (智谱AI):**
 ```bash
 export BIGMODEL_API_KEY="your-bigmodel-api-key"
-# Then use BigModel via ReqLLM
+export LLM_MODEL="GLM-4"
 ```
 
-See [BigModel Quick Start Guide](BIGMODEL快速开始.md) for detailed usage.
+**For OpenAI:**
+```bash
+export OPENAI_API_KEY="sk-your-key-here"
+export LLM_MODEL="gpt-3.5-turbo"
+```
 
 ### 3. Setup Database
 
@@ -100,23 +87,6 @@ Visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 ## Usage
 
-### Using BigModel with ReqLLM
-
-This project includes a custom BigModel provider for ReqLLM. To use it:
-
-```elixir
-# In IEx or your code
-model = LLMDB.Model.new!(%{id: "glm-4", provider: :bigmodel})
-{:ok, response} = ReqLLM.generate_text(model, "你好，请介绍一下你自己")
-text = ReqLLM.Response.text(response)
-```
-
-See the comprehensive guides:
-- [Quick Start Guide (English)](BIGMODEL_QUICKSTART.md)
-- [快速开始指南（中文）](BIGMODEL快速开始.md)
-- [Implementation Details](BIGMODEL_IMPLEMENTATION.md)
-- [Detailed Usage Guide](lib/chat_controller/ai/big_model_usage.md)
-
 ### Quick Test
 
 The chat interface includes three example prompt buttons:
@@ -136,41 +106,12 @@ All conversations are persisted to PostgreSQL and restored on page refresh.
 
 ## Configuration
 
-### LLM Settings (config/dev.exs)
+### LangChain Settings (config/config.exs)
 
 ```elixir
-config :chat_controller,
-  llm_model: System.get_env("LLM_MODEL") || "gpt-3.5-turbo",
-  llm_provider: :openai,
-  openai_base_url: System.get_env("OPENAI_BASE_URL") || "http://localhost:11434/v1",
-  openai_api_key: System.get_env("OPENAI_API_KEY")
-```
-
-### Adding Custom Tools
-
-Edit `lib/chat_controller/ai/tools.ex` to add new tools:
-
-```elixir
-defp build_tools do
-  # Existing tools...
-  
-  # Add your custom tool
-  {:ok, my_tool} = ReqLLM.Tool.new(
-    name: "my_custom_tool",
-    description: "What this tool does",
-    parameter_schema: [
-      param_name: [type: :string, required: true, doc: "Parameter description"]
-    ],
-    callback: &my_callback/1
-  )
-  
-  [weather_tool, user_tool, fetch_tool, my_tool]
-end
-
-defp my_callback(%{"param_name" => value}) do
-  # Your tool logic here
-  {:ok, "Result: #{value}"}
-end
+config :langchain,
+  openai_key: System.get_env("BIGMODEL_API_KEY"),
+  openai_endpoint: "https://open.bigmodel.cn/api/paas/v4"
 ```
 
 ## Project Structure
@@ -178,16 +119,13 @@ end
 ```
 lib/chat_controller/
 ├── ai/
-│   ├── big_model.ex           # Custom BigModel provider for ReqLLM
-│   ├── chat_agent.ex          # GenServer for chat sessions
-│   ├── llm.ex                 # ReqLLM wrapper
-│   ├── llm_response.ex        # Response adapter
-│   ├── tools.ex               # Tool definitions
-│   └── jido/
-│       ├── orchestration.ex   # Main orchestration loop
-│       ├── model_step.ex      # LLM invocation
-│       ├── tool_step.ex       # Tool execution
-│       └── completion_step.ex # Final response extraction
+│   ├── langchain/
+│   │   ├── agent.ex          # LangChain agent implementation
+│   │   └── tools/
+│   │       ├── weather.ex     # Weather tool
+│   │       ├── user_info.ex   # User info tool
+│   │       └── http_fetch.ex  # HTTP fetch tool
+│   └── chat_agent.ex          # GenServer for chat sessions
 ├── chat/
 │   ├── conversation.ex        # Conversation schema
 │   ├── message.ex             # Message schema
@@ -215,22 +153,10 @@ sudo systemctl start postgresql
 
 ### LLM Connection Error
 
-**For OpenAI:**
+**For BigModel:**
 - Verify your API key is correct
-- Check your OpenAI account has credits
-- Ensure OPENAI_BASE_URL is `https://api.openai.com/v1`
-
-**For Ollama:**
-```bash
-# Check if Ollama is running
-curl http://localhost:11434/api/tags
-
-# Start Ollama if needed
-ollama serve
-
-# Pull a model if you haven't
-ollama pull llama2
-```
+- Check your BigModel account has credits
+- Ensure BIGMODEL_API_KEY is set correctly
 
 ### Asset Compilation Issues
 
@@ -260,27 +186,6 @@ mix precommit
 
 ## Deployment
 Ready to run in production? Please [check the Phoenix deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## BigModel Provider
-
-This project includes a fully-featured custom provider for BigModel (智谱AI):
-
-- ✅ Minimal implementation (14 lines of code)
-- ✅ Full OpenAI compatibility via ReqLLM defaults
-- ✅ Chat completions, streaming, tools, vision (glm-4v)
-- ✅ Comprehensive documentation and examples
-- ✅ Unit tested (6/6 tests passing)
-
-**Available Models:**
-- `glm-4` - Standard chat model
-- `glm-4-plus` - Enhanced performance
-- `glm-4v` - Vision model
-- `glm-3-turbo` - Fast & cost-effective
-
-For more information, see:
-- [Quick Start (English)](BIGMODEL_QUICKSTART.md)
-- [快速开始（中文）](BIGMODEL快速开始.md)
-- [Implementation Guide](BIGMODEL_IMPLEMENTATION.md)
 
 ## Reference Project
 

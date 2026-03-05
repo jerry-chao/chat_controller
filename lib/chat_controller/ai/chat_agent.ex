@@ -1,11 +1,10 @@
 defmodule ChatController.AI.ChatAgent do
   @moduledoc """
-  Chat agent using Jido.AI for tool-calling capabilities.
-  This module now delegates to ChatController.AI.JidoAI.Agent.
+  Chat agent using LangChain for tool-calling capabilities.
+  This module delegates to ChatController.AI.LangChain.Agent.
   """
 
-  # Delegate to JidoAI.Agent for backward compatibility
-  defdelegate start_link(opts \\ []), to: ChatController.AI.JidoAI.Agent
+  defdelegate start_link(opts \\ []), to: ChatController.AI.LangChain.Agent
 
-  defdelegate ask_sync(agent, message, opts \\ []), to: ChatController.AI.JidoAI.Agent
+  defdelegate ask_sync(agent, message, opts \\ []), to: ChatController.AI.LangChain.Agent
 end

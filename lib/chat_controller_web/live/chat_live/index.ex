@@ -154,7 +154,7 @@ defmodule ChatControllerWeb.ChatLive.Index do
             ChatController AI
           </h1>
           <p class="text-lg text-gray-600">
-            Powered by ReqLLM with HTTP Tools
+            Powered by LangChain with HTTP Tools
           </p>
         </div>
 
